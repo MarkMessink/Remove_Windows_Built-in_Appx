@@ -6,13 +6,13 @@
     Author:      Mark Messink
     Contact:     
     Created:     2020-07-05
-    Updated:     2022-11-21
+    Updated:     2022-12-21
 
     Version history:
 	1.0.3 - (2021-12-21) Windows 10 build 21H2, Windows 11 build 21H2
 	1.0.4 - Changed logging
 	1.0.5 - Add creating list of installed Appx to Installed_Appx_List.txt
-	1.0.6 - (2022-11-21) Windows 10 build 21H2, Windows 11 build 22H2
+	1.0.6 - (2022-12-21) Windows 10 build 21H2, Windows 11 build 22H2
 
 .DESCRIPTION
 	This script will remove all built-in appx with a provisioning package that's not specified in the 'white-list' in this script.
@@ -36,7 +36,7 @@
 	./scriptnaam.ps1
 
 .LINK Information
-	https://docs.microsoft.com/en-us/windows/application-management/apps-in-windows-10
+	https://learn.microsoft.com/en-us/windows/application-management/provisioned-apps-windows-client-os
 
 .NOTES
 	WindowsBuild:
@@ -45,6 +45,7 @@
 	LowestWindowsBuild = 19000 en HighestWindowsBuild 19999 zijn alle Windows 10 versies
 	LowestWindowsBuild = 22000 en HighestWindowsBuild 22999 zijn alle Windows 11 versies
 	Zie: https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
+
 
 .NOTES
 	Microsoft Store:
@@ -63,7 +64,7 @@ $logpath = "C:\IntuneLogs"
 $NameLogfile = "PSlog_RemoveBuiltinAppx.txt"
 $LowestWindowsBuild = 0
 $HighestWindowsBuild = 50000
-$InstalledAppxList = Installed_Appx_List.txt
+$InstalledAppxList = "Installed_Appx_List.txt"
 
 
 
@@ -83,7 +84,7 @@ If(!(test-path $logpath))
 }
 
 # Add date + time to Logfile
-$TimeStamp = "{0:yyyyMMdd-HHmm}" -f (get-date)
+$TimeStamp = "{0:yyyyMMdd}" -f (get-date)
 $logFile = "$logpath\" + "$TimeStamp" + "_" + "$NameLogfile"
 
 # Start Transcript logging
@@ -102,13 +103,13 @@ If ($WindowsBuild -ge $LowestWindowsBuild -And $WindowsBuild -le $HighestWindows
 #################### Start base script ################################
 
 #################### Start uitvoeren script code ####################
-Write-Output "-------------------------------------------------------------------------------------"
-Write-Output "### Start uitvoeren script code ###"
-Write-Output "-------------------------------------------------------------------------------------"
+Write-Output "#####################################################################################"
+Write-Output "### Start uitvoeren script code                                                   ###"
+Write-Output "#####################################################################################"
 
 #Create list installed Appx
-[system.Environment]::OSVersion.Version | Out-File -FilePath $path\$InstalledAppxList
-Get-AppxProvisionedPackage -online | FT Displayname | Out-File -FilePath $path\$InstalledAppxList -Append
+[system.Environment]::OSVersion.Version | Out-File -FilePath $logpath\$InstalledAppxList -Append
+Get-AppxProvisionedPackage -online | FT Displayname | Out-File -FilePath $logpath\$InstalledAppxList -Append
 
 #Create WhiteList Array
 $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
@@ -122,7 +123,7 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 	
 <##### Microsoft Edge Browser, Use Default installed Edge Chromium or deploy Edge from Intune #####>
 	$WhiteListedAppx.AddRange(@(
-	"Microsoft.MicrosoftEdge.Stable"
+	"Microsoft.MicrosoftEdge"
 	))
     		
 <##### Windows 10 Build: 21H2 #####>
@@ -150,11 +151,11 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 	"Microsoft.WebpImageExtension",
 	"Microsoft.Windows.Photos",
 	### "Microsoft.WindowsAlarms",
-	"Microsoft.WindowsCalculator"
+	"Microsoft.WindowsCalculator",
 	"Microsoft.WindowsCamera",
 	### "Microsoft.windowscommunicationsapps",
 	### "Microsoft.WindowsFeedbackHub",
-	"Microsoft.WindowsMaps",
+	"Microsoft.WindowsMaps" # last whitelisted item no comma
 	### "Microsoft.WindowsSoundRecorder",
 	### "Microsoft.Xbox.TCUI",
 	### "Microsoft.XboxApp",
@@ -190,12 +191,6 @@ Write-Output "------------------------------------------------------------------
 
 # Determine provisioned apps
 $AppArrayList = Get-AppxProvisionedPackage -Online | Select-Object -ExpandProperty DisplayName
-Write-Output "-------------------------------------------------------------------------------"
-Write-Output "List Installed packages:"	
-$AppArrayList
-	
-Write-Output "-------------------------------------------------------------------------------"
-Write-Output "----- Start removing packages"		
 
 # Loop through the list of appx packages
 foreach ($App in $AppArrayList) {
@@ -204,7 +199,7 @@ foreach ($App in $AppArrayList) {
 
     # If application name not in appx package white list, remove AppxPackage and AppxProvisioningPackage
     if (($App -in $WhiteListedAppx)) {
-        Write-Output ">>> Skipping excluded application package: $($App)"
+        Write-Output "--- Skipping excluded application package: $($App)"
         }
         else {
             # Gather package names
@@ -214,29 +209,29 @@ foreach ($App in $AppArrayList) {
             # Attempt to remove AppxPackage
             if ($AppPackageFullName -ne $null) {
                 try {
-                    Write-Output "Removing AppxPackage: $($AppPackageFullName)"
+                    Write-Output ">>> Removing AppxPackage: $($AppPackageFullName)"
                     Remove-AppxPackage -Package $AppPackageFullName -ErrorAction Stop | Out-Null
                 }
                 catch [System.Exception] {
-                    Write-Output "Removing AppxPackage '$($AppPackageFullName)' failed: $($_.Exception.Message)"
+                    Write-Output "!!! Removing AppxPackage '$($AppPackageFullName)' failed: $($_.Exception.Message)"
                 }
             }
             else {
-                Write-Output "Unable to locate AppxPackage for current app: $($App)"
+                Write-Output "!!! Unable to locate AppxPackage for current app: $($App)"
             }
 
             # Attempt to remove AppxProvisioningPackage
             if ($AppProvisioningPackageName -ne $null) {
                 try {
-                    Write-Output "Removing AppxProvisioningPackage: $($AppProvisioningPackageName)"
+                    Write-Output ">>> Removing AppxProvisioningPackage: $($AppProvisioningPackageName)"
                     Remove-AppxProvisionedPackage -PackageName $AppProvisioningPackageName -Online -ErrorAction Stop | Out-Null
                 }
                 catch [System.Exception] {
-                    Write-Output "Removing AppxProvisioningPackage '$($AppProvisioningPackageName)' failed: $($_.Exception.Message)"
+                    Write-Output "!!! Removing AppxProvisioningPackage '$($AppProvisioningPackageName)' failed: $($_.Exception.Message)"
                 }
             }
             else {
-                Write-Output "Unable to locate AppxProvisioningPackage for current app: $($App)"
+                Write-Output "!!! Unable to locate AppxProvisioningPackage for current app: $($App)"
             }
         }
     }
@@ -246,9 +241,9 @@ foreach ($App in $AppArrayList) {
     Write-Output "Completed built-in AppxPackage, AppxProvisioningPackage removal process"
 	Write-Output "-------------------------------------------------------------------------------"
 
-Write-Output "-------------------------------------------------------------------------------------"
-Write-Output "### Einde uitvoeren script code ###"
-Write-Output "-------------------------------------------------------------------------------------"
+Write-Output "#####################################################################################"
+Write-Output "### Einde uitvoeren script code                                                   ###"
+Write-Output "#####################################################################################"
 #################### Einde uitvoeren script code ####################
 
 #################### End base script #######################
