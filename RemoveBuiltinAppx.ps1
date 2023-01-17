@@ -134,11 +134,11 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 	### "Microsoft.Getstarted",
 	"Microsoft.HEIFImageExtension",
 	### "Microsoft.Microsoft3DViewer",
-	"Microsoft.MicrosoftOfficeHub",
+	### "Microsoft.MicrosoftOfficeHub",
 	### "Microsoft.MicrosoftSolitaireCollection",
 	### "Microsoft.MicrosoftStickyNotes",
 	### "Microsoft.MixedReality.Portal",
-	"Microsoft.MSPaint",
+	### "Microsoft.MSPaint",
 	### "Microsoft.Office.OneNote",
 	### "Microsoft.People",
 	### "Microsoft.ScreenSketch",
@@ -148,14 +148,14 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 	"Microsoft.VP9VideoExtensions",
 	### "Microsoft.Wallet",
 	"Microsoft.WebMediaExtensions",
-	"Microsoft.WebpImageExtension",
-	"Microsoft.Windows.Photos",
+	"Microsoft.WebpImageExtension" # last whitelisted item no comma
+	### "Microsoft.Windows.Photos",
 	### "Microsoft.WindowsAlarms",
-	"Microsoft.WindowsCalculator",
-	"Microsoft.WindowsCamera",
+	### "Microsoft.WindowsCalculator",
+	### "Microsoft.WindowsCamera",
 	### "Microsoft.windowscommunicationsapps",
 	### "Microsoft.WindowsFeedbackHub",
-	"Microsoft.WindowsMaps" # last whitelisted item no comma
+	### "Microsoft.WindowsMaps"
 	### "Microsoft.WindowsSoundRecorder",
 	### "Microsoft.Xbox.TCUI",
 	### "Microsoft.XboxApp",
@@ -171,16 +171,18 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 <##### Append to Windows 10 #####>		
 <##### Windows 11 Build: 22H2 #####>
 	$WhiteListedAppx.AddRange(@(
-	"Clipchamp.Clipchamp",
+	### "Clipchamp.Clipchamp",
 	### "Microsoft.BingNews",
 	### "Microsoft.GamingApp",
-	"Microsoft.Paint",
+	### "Microsoft.Paint",
+	### "Microsoft.Whiteboard",
 	### "Microsoft.PowerAutomateDesktop",
 	### "Microsoft.Todos",
 	"Microsoft.UI.Xaml.2.4",
-	"Microsoft.WindowsNotepad",
+	### "Microsoft.WindowsNotepad",
 	### "Microsoft.WindowsTerminal",
-	### "MicrosoftTeams",
+	"Microsoft.OneDriveSync",
+	"MicrosoftTeams",
 	"MicrosoftCorporationII.QuickAssist",
 	"MicrosoftWindows.Client.WebExperience"
     ))
