@@ -6,13 +6,14 @@
     Author:      Mark Messink
     Contact:     
     Created:     2020-07-05
-    Updated:     2022-12-21
+    Updated:     2024-05-08
 
     Version history:
 	1.0.3 - (2021-12-21) Windows 10 build 21H2, Windows 11 build 21H2
 	1.0.4 - Changed logging
 	1.0.5 - Add creating list of installed Appx to Installed_Appx_List.txt
 	1.0.6 - (2022-12-21) Windows 10 build 21H2, Windows 11 build 22H2
+	1.0.7 - (2024-05-08) Windows 11 build 23H2, Windows Insider preview 26080
 
 .DESCRIPTION
 	This script will remove all built-in appx with a provisioning package that's not specified in the 'white-list' in this script.
@@ -62,7 +63,7 @@
 #################### Variabelen #####################################
 $logpath = "C:\IntuneLogs"
 $NameLogfile = "PSlog_RemoveBuiltinAppx.txt"
-$LowestWindowsBuild = 0
+$LowestWindowsBuild = 26080
 $HighestWindowsBuild = 50000
 $InstalledAppxList = "Installed_Appx_List.txt"
 
@@ -85,7 +86,7 @@ If(!(test-path $logpath))
 
 # Add date + time to Logfile
 $TimeStamp = "{0:yyyyMMdd}" -f (get-date)
-$logFile = "$logpath\" + "$TimeStamp" + "_" + "$NameLogfile"
+$logFile = "$logpath\" + "$TimeStamp" + "_" + "$LowestWindowsBuild" + "_" + "$NameLogfile"
 
 # Start Transcript logging
 Start-Transcript $logFile -Append -Force
@@ -121,71 +122,43 @@ $WhiteListedAppx = New-Object -TypeName System.Collections.ArrayList
 	"Microsoft.DesktopAppInstaller" # Winget feature - Cannot be uninstalled.
 	))
 	
-<##### Microsoft Edge Browser, Use Default installed Edge Chromium or deploy Edge from Intune #####>
+<##### Microsoft Edge Browser, Use Default installed Edge or deploy Edge from Intune #####>
 	$WhiteListedAppx.AddRange(@(
-	"Microsoft.MicrosoftEdge"
+	### "Microsoft.MicrosoftEdge.Stable"
+	))
+	
+<##### Other Apps #####>
+	$WhiteListedAppx.AddRange(@(
+	"Microsoft.CompanyPortal",
+	"Microsoft.OneDriveSync"
 	))
     		
-<##### Windows 10 Build: 21H2 #####>
+<##### Windows 11 Build: 26080 #####>
 	$WhiteListedAppx.AddRange(@(
-	### "Microsoft.549981C3F5F10", #Cortana
-	### "Microsoft.BingWeather",
-	### "Microsoft.GetHelp",
-	### "Microsoft.Getstarted",
-	"Microsoft.HEIFImageExtension",
-	### "Microsoft.Microsoft3DViewer",
-	### "Microsoft.MicrosoftOfficeHub",
-	### "Microsoft.MicrosoftSolitaireCollection",
-	### "Microsoft.MicrosoftStickyNotes",
-	### "Microsoft.MixedReality.Portal",
-	### "Microsoft.MSPaint",
-	### "Microsoft.Office.OneNote",
-	### "Microsoft.People",
-	### "Microsoft.ScreenSketch",
-	### "Microsoft.SkypeApp",
-	"Microsoft.StorePurchaseApp",
-	"Microsoft.VCLibs.140.00",
-	"Microsoft.VP9VideoExtensions",
-	### "Microsoft.Wallet",
-	"Microsoft.WebMediaExtensions",
-	"Microsoft.WebpImageExtension" # last whitelisted item no comma
-	### "Microsoft.Windows.Photos",
-	### "Microsoft.WindowsAlarms",
-	### "Microsoft.WindowsCalculator",
-	### "Microsoft.WindowsCamera",
-	### "Microsoft.windowscommunicationsapps",
-	### "Microsoft.WindowsFeedbackHub",
-	### "Microsoft.WindowsMaps"
-	### "Microsoft.WindowsSoundRecorder",
-	### "Microsoft.Xbox.TCUI",
-	### "Microsoft.XboxApp",
-	### "Microsoft.XboxGameOverlay",
-	### "Microsoft.XboxGamingOverlay",
-	### "Microsoft.XboxIdentityProvider",
-	### "Microsoft.XboxSpeechToTextOverlay",
-	### "Microsoft.YourPhone"
-	### "Microsoft.ZuneMusic",
-	### "Microsoft.ZuneVideo"
-	))
+    "Microsoft.ApplicationCompatibilityEnhancements",
+    "Microsoft.AV1VideoExtension",   
+    "Microsoft.AVCEncoderVideoExtension",                             
+    "Microsoft.HEIFImageExtension",                
+    "Microsoft.HEVCVideoExtension",                               
+    "Microsoft.MicrosoftOfficeHub",                
+    "Microsoft.MPEG2VideoExtension",                
+    "Microsoft.Paint",               
+    "Microsoft.RawImageExtension",
+    "Microsoft.ScreenSketch",                 
+    "Microsoft.SecHealthUI",                      
+    "Microsoft.StorePurchaseApp",                    
+    "Microsoft.VP9VideoExtensions",                  
+    "Microsoft.WebMediaExtensions",                
+    "Microsoft.WebpImageExtension",                               
+    "Microsoft.WindowsAlarms",                    
+    "Microsoft.WindowsCalculator",
+    "Microsoft.WindowsCamera",                 
+    "Microsoft.WindowsNotepad",                     
+    "Microsoft.WindowsSoundRecorder",
+    "MicrosoftCorporationII.QuickAssist",
+    "MicrosoftWindows.Client.WebExperience"  # last whitelisted item no comma
 
-<##### Append to Windows 10 #####>		
-<##### Windows 11 Build: 22H2 #####>
-	$WhiteListedAppx.AddRange(@(
-	### "Clipchamp.Clipchamp",
-	### "Microsoft.BingNews",
-	### "Microsoft.GamingApp",
-	### "Microsoft.Paint",
-	### "Microsoft.Whiteboard",
-	### "Microsoft.PowerAutomateDesktop",
-	### "Microsoft.Todos",
-	"Microsoft.UI.Xaml.2.4",
-	### "Microsoft.WindowsNotepad",
-	### "Microsoft.WindowsTerminal",
-	"Microsoft.OneDriveSync",
-	"MicrosoftTeams",
-	"MicrosoftCorporationII.QuickAssist",
-	"MicrosoftWindows.Client.WebExperience"
-    ))
+	))
 
 Write-Output "-------------------------------------------------------------------------------"
 Write-Output "Starting built-in AppxPackage, AppxProvisioningPackage removal process"
